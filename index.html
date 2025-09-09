@@ -335,7 +335,7 @@
                 try {
                     // Here you would send to your n8n webhook
                     const formData = new FormData();
-                    formData.append('audio', this.audioBlob, 'recording.webm');
+                    formData.append('data', this.audioBlob, 'recording.webm');
                     formData.append('timestamp', new Date().toISOString());
                     formData.append('device_type', this.getDeviceType());
                     
