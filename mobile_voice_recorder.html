@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Mobile Voice Recorder</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            background: #1a1a1a;
+            color: #f0f0f0;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+        
+        .container {
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .status {
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .record-button {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid #333;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 40px auto;
+            position: relative;
+        }
+        
+        .record-button:hover {
+            border-color: #555;
+        }
+        
+        .record-button.recording {
+            border-color: #e60000;
+            animation: pulse 2s infinite;
+        }
+        
+        .record-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #e60000;
+            transition: all 0.3s ease;
+        }
+        
+        .record-button.recording .record-icon {
+            border-radius: 10px;
+            width: 30px;
+            height: 30px;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .timer {
+            font-size: 2rem;
+            font-weight: 300;
+            margin-bottom: 20px;
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            background: #333;
+            border: 1px solid #555;
+            color: #f0f0f0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .btn:hover {
+            background: #444;
+            border-color: #666;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .transcript {
+            background: #2b2b2b;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .error {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 480px) {
+            .record-button {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .record-icon {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .record-button.recording .record-icon {
+                width: 25px;
+                height: 25px;
+            }
+            
+            .timer {
+                font-size: 1.8rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .btn {
+                width: 100%;
+                padding: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="status" id="status">Tap the button to start recording</div>
+        
+        <div class="timer" id="timer">00:00</div>
+        
+        <button class="record-button" id="recordButton">
+            <div class="record-icon"></div>
+        </button>
+        
+        <div class="controls">
+            <button class="btn hidden" id="stopButton">Stop</button>
+            <button class="btn hidden" id="playButton">Play</button>
+        </div>
+        
+        <div class="transcript hidden" id="transcript"></div>
+    </div>
+
+    <script>
+        class MobileVoiceRecorder {
+            constructor() {
+                this.mediaRecorder = null;
+                this.audioChunks = [];
+                this.isRecording = false;
+                this.startTime = null;
+                this.timerInterval = null;
+                this.audioBlob = null;
+                
+                this.recordButton = document.getElementById('recordButton');
+                this.stopButton = document.getElementById('stopButton');
+                this.playButton = document.getElementById('playButton');
+                this.status = document.getElementById('status');
+                this.timer = document.getElementById('timer');
+                this.transcript = document.getElementById('transcript');
+                
+                this.setupEventListeners();
+                this.checkBrowserSupport();
+            }
+            
+            checkBrowserSupport() {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    this.showError('Your browser does not support audio recording. Please use Chrome, Firefox, or Safari.');
+                    return false;
+                }
+                return true;
+            }
+            
+            setupEventListeners() {
+                this.recordButton.addEventListener('click', () => this.toggleRecording());
+                this.stopButton.addEventListener('click', () => this.stopRecording());
+                this.playButton.addEventListener('click', () => this.playRecording());
+            }
+            
+            async toggleRecording() {
+                if (!this.isRecording) {
+                    await this.startRecording();
+                } else {
+                    this.stopRecording();
+                }
+            }
+            
+            async startRecording() {
+                try {
+                    // Mobile-optimized audio constraints
+                    const constraints = {
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true,
+                            sampleRate: 16000,
+                            channelCount: 1
+                        }
+                    };
+                    
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    
+                    // Use webm for better mobile compatibility
+                    const options = {
+                        mimeType: 'audio/webm;codecs=opus'
+                    };
+                    
+                    // Fallback for iOS Safari
+                    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                        options.mimeType = 'audio/mp4';
+                    }
+                    
+                    this.mediaRecorder = new MediaRecorder(stream, options);
+                    this.audioChunks = [];
+                    
+                    this.mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            this.audioChunks.push(event.data);
+                        }
+                    };
+                    
+                    this.mediaRecorder.onstop = () => {
+                        this.audioBlob = new Blob(this.audioChunks, { type: options.mimeType });
+                        this.processRecording();
+                    };
+                    
+                    this.mediaRecorder.start(100); // Collect data every 100ms
+                    
+                    this.isRecording = true;
+                    this.recordButton.classList.add('recording');
+                    this.stopButton.classList.remove('hidden');
+                    this.status.textContent = 'Recording... Tap stop when finished';
+                    this.startTimer();
+                    
+                } catch (error) {
+                    console.error('Error starting recording:', error);
+                    
+                    if (error.name === 'NotAllowedError') {
+                        this.showError('Microphone access denied. Please allow microphone access and refresh the page.');
+                    } else if (error.name === 'NotFoundError') {
+                        this.showError('No microphone found. Please connect a microphone and try again.');
+                    } else {
+                        this.showError('Could not start recording. Please try again.');
+                    }
+                }
+            }
+            
+            stopRecording() {
+                if (this.mediaRecorder && this.isRecording) {
+                    this.mediaRecorder.stop();
+                    this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                    
+                    this.isRecording = false;
+                    this.recordButton.classList.remove('recording');
+                    this.stopButton.classList.add('hidden');
+                    this.stopTimer();
+                    this.status.textContent = 'Processing recording...';
+                }
+            }
+            
+            startTimer() {
+                this.startTime = Date.now();
+                this.timerInterval = setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+                    this.timer.textContent = this.formatTime(elapsed);
+                }, 100);
+            }
+            
+            stopTimer() {
+                if (this.timerInterval) {
+                    clearInterval(this.timerInterval);
+                    this.timerInterval = null;
+                }
+            }
+            
+            formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+            
+            async processRecording() {
+                try {
+                    // Here you would send to your n8n webhook
+                    const formData = new FormData();
+                    formData.append('audio', this.audioBlob, 'recording.webm');
+                    formData.append('timestamp', new Date().toISOString());
+                    formData.append('device_type', this.getDeviceType());
+                    
+                    // Replace with your actual n8n webhook URL
+                    const webhookUrl = 'https://your-n8n-webhook-url.com/voice-intake';
+                    
+                    this.status.textContent = 'Transcribing...';
+                    
+                    const response = await fetch(webhookUrl, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Server error: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    
+                    this.displayTranscript(result.transcript || 'Transcription completed successfully');
+                    this.status.textContent = 'Recording complete!';
+                    this.playButton.classList.remove('hidden');
+                    
+                    // Reset timer
+                    this.timer.textContent = '00:00';
+                    
+                } catch (error) {
+                    console.error('Error processing recording:', error);
+                    this.showError('Failed to process recording. Please try again.');
+                }
+            }
+            
+            playRecording() {
+                if (this.audioBlob) {
+                    const audioUrl = URL.createObjectURL(this.audioBlob);
+                    const audio = new Audio(audioUrl);
+                    audio.play();
+                    
+                    // Clean up URL after playing
+                    audio.addEventListener('ended', () => {
+                        URL.revokeObjectURL(audioUrl);
+                    });
+                }
+            }
+            
+            displayTranscript(text) {
+                this.transcript.textContent = text;
+                this.transcript.classList.remove('hidden');
+            }
+            
+            showError(message) {
+                this.status.innerHTML = `<div class="error">${message}</div>`;
+            }
+            
+            getDeviceType() {
+                const userAgent = navigator.userAgent;
+                if (/iPhone|iPad|iPod/.test(userAgent)) return 'iOS';
+                if (/Android/.test(userAgent)) return 'Android';
+                if (/Mobi/.test(userAgent)) return 'Mobile';
+                return 'Desktop';
+            }
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new MobileVoiceRecorder();
+        });
+        
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch((registrationError) => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
