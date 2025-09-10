@@ -36,11 +36,12 @@
         }
         
         .top-section {
-            flex: 1;
-            padding: 40px 20px 20px;
+            flex: 0 0 auto;
+            padding: 60px 20px 40px;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
+            min-height: 200px;
         }
         
         .bullets-container {
@@ -51,16 +52,16 @@
         }
         
         .bullet-item {
-            background: rgba(235, 232, 232, 0.05);
-            border-radius: 12px;
-            padding: 12px 16px;
-            margin-bottom: 8px;
-            border-left: 3px solid #e60000;
-            backdrop-filter: blur(10px);
+            padding: 8px 0;
+            margin-bottom: 16px;
             animation: slideInUp 0.5s ease-out;
             opacity: 0;
             animation-fill-mode: forwards;
             transition: all 0.3s ease;
+            text-align: left;
+            color: #EBE8E8;
+            font-size: 1.1rem;
+            font-weight: 300;
         }
         
         .bullet-item.fade-out {
@@ -95,8 +96,15 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             position: relative;
+            padding: 40px 20px;
+            min-height: 300px;
+        }
+        
+        .text-content {
+            margin-left: 20px;
+            width: calc(100% - 40px);
         }
         
         .wavy-gradient {
@@ -128,11 +136,13 @@
         }
         
         .bottom-section {
-            padding: 20px;
+            flex: 0 0 auto;
+            padding: 40px 20px 60px;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 20px;
+            gap: 30px;
+            min-height: 120px;
         }
         
         /* Transcript Screen Styles */
@@ -213,13 +223,26 @@
             fill: #212121;
         }
         
+        .question-prompt {
+            font-size: 1.56rem;
+            font-weight: 400;
+            font-style: italic;
+            color: #EBE8E8;
+            margin: 40px 0;
+            text-align: left;
+            opacity: 1;
+        }
+        
         .status {
-            font-size: 1.2rem;
-            margin-bottom: 40px;
-            min-height: 60px;
+            font-size: 2rem;
+            margin: 60px 0;
+            min-height: 80px;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
+            font-weight: 300;
+            color: #EBE8E8;
+            text-align: left;
         }
         
         .control-btn {
@@ -262,10 +285,13 @@
         
         
         .timer {
-            font-size: 2rem;
+            font-size: 1.25rem;
             font-weight: 300;
-            margin-bottom: 20px;
+            margin: 20px 0;
             font-variant-numeric: tabular-nums;
+            color: #EBE8E8;
+            opacity: 0.6;
+            text-align: left;
         }
         
         .controls {
@@ -362,8 +388,11 @@
         
         <div class="center-section">
             <div class="wavy-gradient" id="wavyGradient"></div>
-            <div class="status" id="status">Tap record to start</div>
-            <div class="timer" id="timer">00:00</div>
+            <div class="text-content">
+                <div class="status" id="status">Tap record to start</div>
+                <div class="timer" id="timer">00:00</div>
+                <div class="question-prompt" id="questionPrompt">How are you feeling today?</div>
+            </div>
         </div>
         
         <div class="bottom-section">
