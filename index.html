@@ -37,11 +37,11 @@
         
         .top-section {
             flex: 0 0 auto;
-            padding: 60px 20px 40px;
+            padding: 40px 20px 20px;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
-            min-height: 200px;
+            min-height: 150px;
         }
         
         .bullets-container {
@@ -96,11 +96,11 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: flex-start;
             position: relative;
-            padding: 40px 20px;
-            min-height: 300px;
+            padding: 20px 20px;
+            min-height: 200px;
         }
         
         .text-content {
@@ -111,12 +111,12 @@
         
         .bottom-section {
             flex: 0 0 auto;
-            padding: 20px 20px 120px;
+            padding: 20px 20px 140px;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 30px;
-            min-height: 80px;
+            min-height: 100px;
             position: relative;
             z-index: 10;
         }
@@ -428,6 +428,7 @@
                 
                 this.setupEventListeners();
                 this.checkBrowserSupport();
+                this.addInitialBullets();
             }
             
             checkBrowserSupport() {
@@ -642,6 +643,21 @@
                     clearInterval(this.bulletInterval);
                     this.bulletInterval = null;
                 }
+            }
+            
+            addInitialBullets() {
+                // Add some initial bullet points to show the interface
+                const initialBullets = [
+                    "Good day so far",
+                    "Looking forward to new challenges",
+                    "Feeling optimistic about the future"
+                ];
+                
+                initialBullets.forEach((bullet, index) => {
+                    setTimeout(() => {
+                        this.addBulletPoint(bullet);
+                    }, index * 500);
+                });
             }
             
             addBulletPoint(text) {
