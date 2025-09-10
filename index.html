@@ -268,7 +268,7 @@
                     const stream = await navigator.mediaDevices.getUserMedia(constraints);
                     
                     // Set up audio analysis for visualization
-                    this.setupAudioAnalysis(stream);
+                    await this.setupAudioAnalysis(stream);
                     
                     // Use webm for better mobile compatibility
                     const options = {
@@ -301,6 +301,15 @@
                     this.stopButton.classList.remove('hidden');
                     this.status.textContent = 'Recording... Tap stop when finished';
                     this.startTimer();
+                    
+                    // Test circle scaling (remove this after testing)
+                    setTimeout(() => {
+                        console.log('Testing circle scaling...');
+                        this.recordButton.style.transform = 'scale(1.2)';
+                        setTimeout(() => {
+                            this.recordButton.style.transform = 'scale(1)';
+                        }, 1000);
+                    }, 2000);
                     
                 } catch (error) {
                     console.error('Error starting recording:', error);
@@ -411,10 +420,17 @@
                 this.status.innerHTML = `<div class="error">${message}</div>`;
             }
             
-            setupAudioAnalysis(stream) {
+            async setupAudioAnalysis(stream) {
                 try {
                     // Create audio context
                     this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // Resume audio context if it's suspended (required for some browsers)
+                    if (this.audioContext.state === 'suspended') {
+                        await this.audioContext.resume();
+                        console.log('Audio context resumed');
+                    }
+                    
                     this.analyser = this.audioContext.createAnalyser();
                     this.microphone = this.audioContext.createMediaStreamSource(stream);
                     
@@ -428,6 +444,9 @@
                     // Create data array for frequency analysis
                     const bufferLength = this.analyser.frequencyBinCount;
                     this.dataArray = new Uint8Array(bufferLength);
+                    
+                    console.log('Audio analysis setup successful');
+                    console.log('Audio context state:', this.audioContext.state);
                     
                     // Start the animation loop
                     this.animateVolume();
@@ -452,6 +471,11 @@
                 const average = sum / this.dataArray.length;
                 const normalizedVolume = average / 255; // Normalize to 0-1
                 
+                // Debug logging (remove this after testing)
+                if (normalizedVolume > 0.01) {
+                    console.log('Volume detected:', normalizedVolume.toFixed(3));
+                }
+                
                 // Update circle scale based on volume
                 this.updateCircleScale(normalizedVolume);
                 
@@ -467,6 +491,9 @@
                     // Calculate scale based on volume (with some smoothing)
                     const scale = this.minScale + (volume * (this.maxScale - this.minScale));
                     this.recordButton.style.transform = `scale(${scale})`;
+                    
+                    // Debug logging
+                    console.log('Scaling circle to:', scale.toFixed(2));
                 } else {
                     // Remove volume-active class and reset scale
                     this.recordButton.classList.remove('volume-active');
