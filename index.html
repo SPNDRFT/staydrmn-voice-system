@@ -14,8 +14,8 @@
         }
         
         body {
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
-            color: #f0f0f0;
+            background: #212121;
+            color: #EBE8E8;
             font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
             height: 100vh;
             display: flex;
@@ -51,7 +51,7 @@
         }
         
         .bullet-item {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(235, 232, 232, 0.05);
             border-radius: 12px;
             padding: 12px 16px;
             margin-bottom: 8px;
@@ -60,6 +60,15 @@
             animation: slideInUp 0.5s ease-out;
             opacity: 0;
             animation-fill-mode: forwards;
+            transition: all 0.3s ease;
+        }
+        
+        .bullet-item.fade-out {
+            opacity: 0;
+            transform: translateY(-20px);
+            max-height: 0;
+            margin-bottom: 0;
+            padding: 0 16px;
         }
         
         .bullet-item:nth-child(odd) {
@@ -124,6 +133,84 @@
             justify-content: center;
             align-items: center;
             gap: 20px;
+        }
+        
+        /* Transcript Screen Styles */
+        .transcript-screen {
+            display: none;
+            flex-direction: column;
+            height: 100vh;
+            background: #212121;
+            color: #EBE8E8;
+        }
+        
+        .transcript-screen.active {
+            display: flex;
+        }
+        
+        .transcript-header {
+            text-align: center;
+            padding: 40px 20px 20px;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #EBE8E8;
+        }
+        
+        .transcript-content {
+            flex: 1;
+            padding: 0 20px;
+            overflow-y: auto;
+            line-height: 1.6;
+            font-size: 1.1rem;
+        }
+        
+        .transcript-controls {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .edit-button {
+            background: transparent;
+            border: 1px solid #EBE8E8;
+            color: #EBE8E8;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .edit-button:hover {
+            background: rgba(235, 232, 232, 0.1);
+        }
+        
+        .transcript-icons {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .transcript-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #EBE8E8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .transcript-icon:hover {
+            background: rgba(235, 232, 232, 0.8);
+        }
+        
+        .transcript-icon svg {
+            width: 20px;
+            height: 20px;
+            fill: #212121;
         }
         
         .status {
@@ -287,6 +374,34 @@
         
         <div class="transcript hidden" id="transcript"></div>
     </div>
+    
+    <!-- Transcript Screen -->
+    <div class="transcript-screen" id="transcriptScreen">
+        <div class="transcript-header">TRANSCRIPT</div>
+        <div class="transcript-content" id="transcriptContent">
+            <!-- Transcript content will be populated here -->
+        </div>
+        <div class="transcript-controls">
+            <button class="edit-button" id="editButton">EDIT</button>
+            <div class="transcript-icons">
+                <div class="transcript-icon" id="transcriptRecord">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                </div>
+                <div class="transcript-icon" id="transcriptPlay">
+                    <svg viewBox="0 0 24 24">
+                        <polygon points="5,3 19,12 5,21"/>
+                    </svg>
+                </div>
+                <div class="transcript-icon" id="transcriptStop">
+                    <svg viewBox="0 0 24 24">
+                        <rect x="6" y="6" width="12" height="12"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         class MobileVoiceRecorder {
@@ -308,10 +423,14 @@
                 this.transcript = document.getElementById('transcript');
                 this.bulletsContainer = document.getElementById('bulletsContainer');
                 this.wavyGradient = document.getElementById('wavyGradient');
+                this.transcriptScreen = document.getElementById('transcriptScreen');
+                this.transcriptContent = document.getElementById('transcriptContent');
+                this.editButton = document.getElementById('editButton');
                 
                 // Bullet point generation
                 this.bulletPoints = [];
                 this.bulletInterval = null;
+                this.maxBullets = 3;
                 
                 this.setupEventListeners();
                 this.checkBrowserSupport();
@@ -329,6 +448,7 @@
                 this.recordButton.addEventListener('click', () => this.toggleRecording());
                 this.stopButton.addEventListener('click', () => this.stopRecording());
                 this.playButton.addEventListener('click', () => this.playRecording());
+                this.editButton.addEventListener('click', () => this.editTranscript());
             }
             
             async toggleRecording() {
@@ -415,6 +535,11 @@
                     this.stopBulletGeneration();
                     this.wavyGradient.classList.remove('active');
                     this.status.textContent = 'Processing recording...';
+                    
+                    // Show transcript screen after processing
+                    setTimeout(() => {
+                        this.showTranscriptScreen();
+                    }, 2000);
                 }
             }
             
@@ -528,6 +653,19 @@
             }
             
             addBulletPoint(text) {
+                // Remove oldest bullet if we have 3 or more
+                if (this.bulletsContainer.children.length >= this.maxBullets) {
+                    const oldestBullet = this.bulletsContainer.firstChild;
+                    if (oldestBullet) {
+                        oldestBullet.classList.add('fade-out');
+                        setTimeout(() => {
+                            if (oldestBullet.parentNode) {
+                                oldestBullet.parentNode.removeChild(oldestBullet);
+                            }
+                        }, 300);
+                    }
+                }
+                
                 const bulletElement = document.createElement('div');
                 bulletElement.className = 'bullet-item';
                 bulletElement.textContent = text;
@@ -535,6 +673,35 @@
                 
                 // Scroll to bottom to show new bullet
                 this.bulletsContainer.scrollTop = this.bulletsContainer.scrollHeight;
+            }
+            
+            showTranscriptScreen() {
+                // Hide main container and show transcript screen
+                document.querySelector('.container').style.display = 'none';
+                this.transcriptScreen.classList.add('active');
+                
+                // Populate transcript content
+                this.transcriptContent.innerHTML = `
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                `;
+            }
+            
+            editTranscript() {
+                // Make transcript content editable
+                this.transcriptContent.contentEditable = true;
+                this.transcriptContent.focus();
+                
+                // Change edit button text
+                this.editButton.textContent = 'SAVE';
+                this.editButton.onclick = () => this.saveTranscript();
+            }
+            
+            saveTranscript() {
+                // Save transcript and make it non-editable
+                this.transcriptContent.contentEditable = false;
+                this.editButton.textContent = 'EDIT';
+                this.editButton.onclick = () => this.editTranscript();
             }
             
             getDeviceType() {
