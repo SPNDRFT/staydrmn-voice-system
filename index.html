@@ -14,22 +14,116 @@
         }
         
         body {
-            background: #1a1a1a;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
             color: #f0f0f0;
             font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
             height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+            padding: 0;
+            margin: 0;
             overflow: hidden;
+            position: relative;
         }
         
         .container {
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
             width: 100%;
-            max-width: 400px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .top-section {
+            flex: 1;
+            padding: 40px 20px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        
+        .bullets-container {
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        
+        .bullet-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-left: 3px solid #e60000;
+            backdrop-filter: blur(10px);
+            animation: slideInUp 0.5s ease-out;
+            opacity: 0;
+            animation-fill-mode: forwards;
+        }
+        
+        .bullet-item:nth-child(odd) {
+            animation-delay: 0.1s;
+        }
+        
+        .bullet-item:nth-child(even) {
+            animation-delay: 0.2s;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .center-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        
+        .wavy-gradient {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, 
+                rgba(230, 0, 0, 0.1) 0%, 
+                rgba(255, 100, 100, 0.05) 25%, 
+                rgba(230, 0, 0, 0.08) 50%, 
+                rgba(255, 50, 50, 0.03) 75%, 
+                rgba(230, 0, 0, 0.1) 100%);
+            background-size: 400% 400%;
+            animation: waveGradient 4s ease-in-out infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .wavy-gradient.active {
+            opacity: 1;
+        }
+        
+        @keyframes waveGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .bottom-section {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
         }
         
         .status {
@@ -41,84 +135,44 @@
             justify-content: center;
         }
         
-        .record-button {
-            width: 120px;
-            height: 120px;
+        .control-btn {
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
-            border: 3px solid #333;
-            background: transparent;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: #f0f0f0;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 40px auto;
-            position: relative;
+            font-size: 24px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
-        .record-button:hover {
-            border-color: #555;
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
         }
         
-        .record-button.recording {
+        .control-btn.recording {
+            background: rgba(230, 0, 0, 0.3);
             border-color: #e60000;
-            animation: organicRipple 3s ease-in-out infinite;
+            animation: pulse 2s ease-in-out infinite;
         }
         
-        @keyframes organicRipple {
-            0% { 
-                transform: scale(1) rotate(0deg);
-                box-shadow: 0 0 0 0 rgba(230, 0, 0, 0.4);
-            }
-            25% { 
-                transform: scale(1.05) rotate(1deg);
-                box-shadow: 0 0 0 8px rgba(230, 0, 0, 0.2);
-            }
-            50% { 
-                transform: scale(1.08) rotate(-0.5deg);
-                box-shadow: 0 0 0 12px rgba(230, 0, 0, 0.1);
-            }
-            75% { 
-                transform: scale(1.03) rotate(0.8deg);
-                box-shadow: 0 0 0 6px rgba(230, 0, 0, 0.15);
-            }
-            100% { 
-                transform: scale(1) rotate(0deg);
-                box-shadow: 0 0 0 0 rgba(230, 0, 0, 0.4);
-            }
-        }
-        
-        .record-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: #e60000;
-            transition: all 0.3s ease;
-        }
-        
-        .record-button.recording .record-icon {
-            border-radius: 10px;
-            width: 30px;
-            height: 30px;
-            animation: iconPulse 2s ease-in-out infinite;
-        }
-        
-        @keyframes iconPulse {
-            0%, 100% { 
-                opacity: 1;
-                transform: scale(1);
-            }
-            50% { 
-                opacity: 0.8;
-                transform: scale(0.95);
-            }
+        .control-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
         }
         
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
+        
         
         .timer {
             font-size: 2rem;
@@ -213,17 +267,22 @@
 </head>
 <body>
     <div class="container">
-        <div class="status" id="status">Tap the button to start recording</div>
+        <div class="top-section">
+            <div class="bullets-container" id="bulletsContainer">
+                <!-- Bullet points will appear here as user speaks -->
+            </div>
+        </div>
         
-        <div class="timer" id="timer">00:00</div>
+        <div class="center-section">
+            <div class="wavy-gradient" id="wavyGradient"></div>
+            <div class="status" id="status">Tap record to start</div>
+            <div class="timer" id="timer">00:00</div>
+        </div>
         
-        <button class="record-button" id="recordButton">
-            <div class="record-icon"></div>
-        </button>
-        
-        <div class="controls">
-            <button class="btn hidden" id="stopButton">Stop</button>
-            <button class="btn hidden" id="playButton">Play</button>
+        <div class="bottom-section">
+            <button class="control-btn" id="playButton" disabled>▶</button>
+            <button class="control-btn" id="recordButton">●</button>
+            <button class="control-btn" id="stopButton" disabled>⏹</button>
         </div>
         
         <div class="transcript hidden" id="transcript"></div>
@@ -247,6 +306,12 @@
                 this.status = document.getElementById('status');
                 this.timer = document.getElementById('timer');
                 this.transcript = document.getElementById('transcript');
+                this.bulletsContainer = document.getElementById('bulletsContainer');
+                this.wavyGradient = document.getElementById('wavyGradient');
+                
+                // Bullet point generation
+                this.bulletPoints = [];
+                this.bulletInterval = null;
                 
                 this.setupEventListeners();
                 this.checkBrowserSupport();
@@ -317,9 +382,12 @@
                     
                     this.isRecording = true;
                     this.recordButton.classList.add('recording');
-                    this.stopButton.classList.remove('hidden');
-                    this.status.textContent = 'Recording... Tap stop when finished';
+                    this.recordButton.textContent = '⏸';
+                    this.stopButton.disabled = false;
+                    this.status.textContent = 'Recording...';
                     this.startTimer();
+                    this.startBulletGeneration();
+                    this.wavyGradient.classList.add('active');
                     
                 } catch (error) {
                     console.error('Error starting recording:', error);
@@ -341,8 +409,11 @@
                     
                     this.isRecording = false;
                     this.recordButton.classList.remove('recording');
-                    this.stopButton.classList.add('hidden');
+                    this.recordButton.textContent = '●';
+                    this.stopButton.disabled = true;
                     this.stopTimer();
+                    this.stopBulletGeneration();
+                    this.wavyGradient.classList.remove('active');
                     this.status.textContent = 'Processing recording...';
                 }
             }
@@ -425,6 +496,45 @@
             
             showError(message) {
                 this.status.innerHTML = `<div class="error">${message}</div>`;
+            }
+            
+            startBulletGeneration() {
+                // Sample bullet points that appear during recording
+                const sampleBullets = [
+                    "Good day so far",
+                    "Looking forward to new challenges", 
+                    "Feeling optimistic about the future",
+                    "Had a productive morning",
+                    "Excited about upcoming projects",
+                    "Feeling grateful for today",
+                    "Ready to tackle new opportunities",
+                    "Feeling confident and motivated"
+                ];
+                
+                let bulletIndex = 0;
+                this.bulletInterval = setInterval(() => {
+                    if (bulletIndex < sampleBullets.length) {
+                        this.addBulletPoint(sampleBullets[bulletIndex]);
+                        bulletIndex++;
+                    }
+                }, 3000); // Add a bullet point every 3 seconds
+            }
+            
+            stopBulletGeneration() {
+                if (this.bulletInterval) {
+                    clearInterval(this.bulletInterval);
+                    this.bulletInterval = null;
+                }
+            }
+            
+            addBulletPoint(text) {
+                const bulletElement = document.createElement('div');
+                bulletElement.className = 'bullet-item';
+                bulletElement.textContent = text;
+                this.bulletsContainer.appendChild(bulletElement);
+                
+                // Scroll to bottom to show new bullet
+                this.bulletsContainer.scrollTop = this.bulletsContainer.scrollHeight;
             }
             
             getDeviceType() {
