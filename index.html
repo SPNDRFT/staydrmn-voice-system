@@ -107,42 +107,17 @@
             width: calc(100% - 40px);
         }
         
-        .wavy-gradient {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, 
-                rgba(230, 0, 0, 0.1) 0%, 
-                rgba(255, 100, 100, 0.05) 25%, 
-                rgba(230, 0, 0, 0.08) 50%, 
-                rgba(255, 50, 50, 0.03) 75%, 
-                rgba(230, 0, 0, 0.1) 100%);
-            background-size: 400% 400%;
-            animation: waveGradient 4s ease-in-out infinite;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .wavy-gradient.active {
-            opacity: 1;
-        }
-        
-        @keyframes waveGradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
         
         .bottom-section {
             flex: 0 0 auto;
-            padding: 40px 20px 60px;
+            padding: 40px 20px 100px;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 30px;
             min-height: 120px;
+            position: relative;
+            z-index: 10;
         }
         
         /* Transcript Screen Styles */
@@ -387,7 +362,6 @@
         </div>
         
         <div class="center-section">
-            <div class="wavy-gradient" id="wavyGradient"></div>
             <div class="text-content">
                 <div class="status" id="status">Tap record to start</div>
                 <div class="timer" id="timer">00:00</div>
@@ -451,7 +425,6 @@
                 this.timer = document.getElementById('timer');
                 this.transcript = document.getElementById('transcript');
                 this.bulletsContainer = document.getElementById('bulletsContainer');
-                this.wavyGradient = document.getElementById('wavyGradient');
                 this.transcriptScreen = document.getElementById('transcriptScreen');
                 this.transcriptContent = document.getElementById('transcriptContent');
                 this.editButton = document.getElementById('editButton');
@@ -536,7 +509,6 @@
                     this.status.textContent = 'Recording...';
                     this.startTimer();
                     this.startBulletGeneration();
-                    this.wavyGradient.classList.add('active');
                     
                 } catch (error) {
                     console.error('Error starting recording:', error);
@@ -562,7 +534,6 @@
                     this.stopButton.disabled = true;
                     this.stopTimer();
                     this.stopBulletGeneration();
-                    this.wavyGradient.classList.remove('active');
                     this.status.textContent = 'Processing recording...';
                     
                     // Show transcript screen after processing
