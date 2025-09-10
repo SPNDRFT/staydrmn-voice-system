@@ -49,6 +49,7 @@
             max-height: 400px;
             overflow-y: auto;
             margin-bottom: 20px;
+            margin-left: 20px;
         }
         
         .bullet-item {
@@ -110,12 +111,12 @@
         
         .bottom-section {
             flex: 0 0 auto;
-            padding: 40px 20px 100px;
+            padding: 20px 20px 120px;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 30px;
-            min-height: 120px;
+            min-height: 80px;
             position: relative;
             z-index: 10;
         }
@@ -203,21 +204,13 @@
             font-weight: 400;
             font-style: italic;
             color: #EBE8E8;
-            margin: 40px 0;
+            margin: 0;
             text-align: left;
             opacity: 1;
         }
         
         .status {
-            font-size: 2rem;
-            margin: 60px 0;
-            min-height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            font-weight: 300;
-            color: #EBE8E8;
-            text-align: left;
+            display: none;
         }
         
         .control-btn {
@@ -262,7 +255,7 @@
         .timer {
             font-size: 1.25rem;
             font-weight: 300;
-            margin: 20px 0;
+            margin: 0 0 8px 0;
             font-variant-numeric: tabular-nums;
             color: #EBE8E8;
             opacity: 0.6;
@@ -363,7 +356,6 @@
         
         <div class="center-section">
             <div class="text-content">
-                <div class="status" id="status">Tap record to start</div>
                 <div class="timer" id="timer">00:00</div>
                 <div class="question-prompt" id="questionPrompt">How are you feeling today?</div>
             </div>
