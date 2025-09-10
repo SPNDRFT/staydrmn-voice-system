@@ -413,7 +413,6 @@
                 this.recordButton = document.getElementById('recordButton');
                 this.stopButton = document.getElementById('stopButton');
                 this.playButton = document.getElementById('playButton');
-                this.status = document.getElementById('status');
                 this.timer = document.getElementById('timer');
                 this.transcript = document.getElementById('transcript');
                 this.bulletsContainer = document.getElementById('bulletsContainer');
@@ -499,7 +498,6 @@
                     this.recordButton.classList.add('recording');
                     this.recordButton.textContent = '⏸';
                     this.stopButton.disabled = false;
-                    this.status.textContent = 'Recording...';
                     this.startTimer();
                     this.startBulletGeneration();
                     
@@ -527,12 +525,11 @@
                     this.stopButton.disabled = true;
                     this.stopTimer();
                     this.stopBulletGeneration();
-                    this.status.textContent = 'Processing recording...';
                     
                     // Show transcript screen after processing
                     setTimeout(() => {
                         this.showTranscriptScreen();
-                    }, 2000);
+                    }, 1000);
                 }
             }
             
@@ -568,7 +565,6 @@
                     // Replace with your actual n8n webhook URL
                     const webhookUrl = 'https://staydrmn.app.n8n.cloud/webhook/voice-intake';
                     
-                    this.status.textContent = 'Transcribing...';
                     
                     const response = await fetch(webhookUrl, {
                         method: 'POST',
@@ -582,7 +578,6 @@
                     const result = await response.json();
                     
                     this.displayTranscript(result.transcript || 'Transcription completed successfully');
-                    this.status.textContent = 'Recording complete!';
                     this.playButton.classList.remove('hidden');
                     
                     // Reset timer
@@ -613,7 +608,8 @@
             }
             
             showError(message) {
-                this.status.innerHTML = `<div class="error">${message}</div>`;
+                console.error(message);
+                alert(message);
             }
             
             startBulletGeneration() {
