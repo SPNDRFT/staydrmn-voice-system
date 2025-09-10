@@ -195,6 +195,7 @@
             <button class="btn hidden" id="stopButton">Stop</button>
             <button class="btn hidden" id="playButton">Play</button>
             <button class="btn" id="testButton" onclick="testCircleScaling()">Test Circle</button>
+            <button class="btn" id="volumeTestButton" onclick="testVolumeDetection()">Test Volume</button>
         </div>
         
         <div class="transcript hidden" id="transcript"></div>
@@ -479,9 +480,14 @@
             }
             
             animateVolume() {
-                if (!this.isRecording || !this.analyser) {
-                    console.log('Animation stopped - isRecording:', this.isRecording, 'analyser:', !!this.analyser);
+                if (!this.analyser) {
+                    console.log('Animation stopped - no analyser');
                     return;
+                }
+                
+                // Continue animation even if recording stopped (for testing)
+                if (!this.isRecording) {
+                    console.log('Recording stopped but continuing animation for testing...');
                 }
                 
                 // Get frequency data
@@ -580,9 +586,37 @@
             }, 2000);
         }
         
+        // Test function for volume detection
+        function testVolumeDetection() {
+            console.log('Testing volume detection manually...');
+            
+            // Get the recorder instance (we'll need to make it global)
+            if (window.voiceRecorder && window.voiceRecorder.updateCircleScale) {
+                console.log('Simulating high volume...');
+                window.voiceRecorder.updateCircleScale(0.3); // High volume
+                
+                setTimeout(() => {
+                    console.log('Simulating medium volume...');
+                    window.voiceRecorder.updateCircleScale(0.1); // Medium volume
+                }, 1000);
+                
+                setTimeout(() => {
+                    console.log('Simulating low volume...');
+                    window.voiceRecorder.updateCircleScale(0.05); // Low volume
+                }, 2000);
+                
+                setTimeout(() => {
+                    console.log('Resetting...');
+                    window.voiceRecorder.updateCircleScale(0.0); // Reset
+                }, 3000);
+            } else {
+                console.log('Voice recorder not available');
+            }
+        }
+        
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', () => {
-            new MobileVoiceRecorder();
+            window.voiceRecorder = new MobileVoiceRecorder();
         });
         
         // PWA Service Worker Registration
